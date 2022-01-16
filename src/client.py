@@ -33,7 +33,7 @@ class Requests:
 req = Requests()  
 for i in range(10):
     r = req.send_requests(({"timestamp": str(datetime.datetime(
-    2022, 1, 15, 23, 59, 0).timestamp()).split('.')[0] ,"A":3,"B":90}))
+    2022, 1, 15, i, i+3, 0).timestamp()).split('.')[0] ,"A":3,"B":90}))
     print(r)
-#print(req.get_minutes_requests())
+print(req.get_minutes_requests())
 #print(req.get_hours_requests())

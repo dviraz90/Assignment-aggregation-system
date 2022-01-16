@@ -16,47 +16,38 @@ class StaticsHandler:
     '''Returns the current date component according to the current epoch'''
     
 
-    def check_last_time(self, epoch_time, time_comp):
-        ''' Check the last hour/minute for eche domain in the domains list.
-            and add them to the matched list.
-            params: 
-                epoch_time - float number that represents date and time.
-                time_comp - str "minute or "hour", represents the time component.
-
-            returns: dictionary of the 2 lists
-        '''
-        # Set times variables. 
-        current_hour, current_minute = self.get_hour(
-            epoch_time), self.get_minute(epoch_time)
-        current_day = int(self.get_date(epoch_time)[8:])
+    def check_last_hour(self,epoch_time):
         domains = self.domains_list()
-        last_minute = current_minute - 1
-        last_hour = current_hour - 1
-        last_day = current_day - 1
-        minute_count = []
-        hour_count = []
-
+        last_hour_domains = []
+        last_hour_epoch = int(epoch_time) - 3600 
+        last_hour = self.get_hour(str(last_hour_epoch))
+        day_last_hour = self.get_date(str(last_hour_epoch)[8:])
         for domain in domains:
-            timestamp_minute = self.get_minute(domain["timestamp"]),
-            timestamp_hour = self.get_hour(domain["timestamp"])
-            timestamp_day = int(self.get_date(domain["timestamp"])[8:])
-            # If the given time component is aminute
-            if time_comp == "minute":
-                # Check if domain's minute equals to current minute
-                # Check if domain's minute equals to last_minute % 60 - for midnight case
-                # Check if domain's day equals to last day - for midnight case
-                if (timestamp_minute == last_minute and current_day == timestamp_day or
-                        timestamp_minute == last_minute % 60 and last_day == timestamp_day):
-                    minute_count.append(domain)
+            timestamp = domain["timestamp"]
+            domain_day = self.get_date(str(timestamp)[8:])
+            if self.get_hour(timestamp) == last_hour and day_last_hour == domain_day:
+                last_hour_domains.append(domain)
+        return last_hour_domains
 
-            # If the given time component is aminute
-            elif time_comp == "hour":
-                # Same logic as above
-                if (timestamp_hour == last_hour and current_day == timestamp_day or
-                        timestamp_hour == last_hour % 24 and last_day == timestamp_day):
-                    hour_count.append(domain)
-      
-        return {"hour":hour_count,"minute": minute_count}
+
+
+
+    def check_last_minute(self, epoch_time):
+        domains = self.domains_list()
+        last_minute_domains = []
+        last_minute_epoch = int(epoch_time) - 60
+        last_minute = self.get_minute(str(last_minute_epoch))
+        hour_last_minute = self.get_hour(str(last_minute_epoch))
+        day_last_minute = self.get_date(str(last_minute_epoch)[8:])
+        for domain in domains:
+            timestamp = domain["timestamp"]
+            domain_day = self.get_date(str(timestamp)[8:])
+            domain_minute = self.get_minute(timestamp)
+            domain_hour = self.get_hour(timestamp)
+            if domain_minute == last_minute and domain_day == day_last_minute and domain_hour == hour_last_minute:
+                last_minute_domains.append(domain)
+        return last_minute_domains
+
 
 
     def get_last_round_hour_domains(self, epoch_time):
@@ -65,8 +56,7 @@ class StaticsHandler:
         '''
 
         domains_last_hour = []
-        last_hour = self.check_last_time(epoch_time, "hour")
-        for domain in last_hour["hour"]:
+        for domain in self.check_last_hour(epoch_time):
             # Create list of domains in the last round hour in a dictionary {"domain": numberOfRequests}
             for key, value in domain.items():
                 # We want only the domains keys
@@ -81,8 +71,7 @@ class StaticsHandler:
              returns list of domains according to that.
         '''
         domains_last_minute = []
-        last_minute = self.check_last_time(epoch_time, "minute")
-        for domain in last_minute["minute"]:
+        for domain in self.check_last_minute(epoch_time):
             # Create list of domains in the last round minute in a dictionary {"domain": numberOfRequests} 
             for key, value in domain.items():
                 # We want only the domains keys
@@ -142,7 +131,7 @@ class StaticsHandler:
 
     key = 0
     def write_stats(self, req_data):
-        
+        ''' Writes stats to db  '''
         for self.key, value in StaticsHandler.data.items():
             pass
         index = int(self.key)+1
@@ -152,12 +141,17 @@ class StaticsHandler:
         abs_file_path = os.path.join(script_dir, rel_path)
         with open(abs_file_path, 'w+') as file_data:
             json.dump(StaticsHandler.data, file_data)
+        return True
 
     
     def reset_db(self):
+        '''Delete DB content '''
         script_dir = os.path.dirname(__file__)
         rel_path = "db.json"
         abs_file_path = os.path.join(script_dir, rel_path)
-        os.remove(abs_file_path)
+        self.key = 0
+        with open(abs_file_path, 'w+') as file_data:
+            StaticsHandler.data.clear()
+            json.dump(StaticsHandler.data, file_data)
         return True
         
