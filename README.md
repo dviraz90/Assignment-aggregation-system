@@ -53,7 +53,7 @@ during 1608102631 (Unix epoch time)
        
  ## Tests
  ### Unit test:
- #### test/test_statistics.py
+ #### tests/test_statistics.py
     dviraz@DESKTOP-A9KS2MS/tests$ python3 test_statistics.py
  ### Integration test: 
  #### src/client.py
