@@ -34,7 +34,7 @@ during 1608102631 (Unix epoch time)
   ## Adding records 
     dviraz@DESKTOP-A9KS2MS$:curl -X POST 'http://localhost:5000/api/events -d {"timestamp": "1636030456", "A": 7, "B": 8, "C":65}
    
-    dviraz@DESKTOP-A9KS2MS/src$ python3 client.py (you can change the payload in send_requests(data))
+   
   ## Listing stats
   By minutes:
     GET /stats/minutes
